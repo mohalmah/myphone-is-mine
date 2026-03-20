@@ -4,11 +4,19 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 rust-version.workspace = true
-description = "Tauri IPC commands for PhoneScope"
+description = "Tauri IPC command handlers for PhoneScope"
 
 [dependencies]
-phonescope-core = { path = "../phonescope-core" }
-phonescope-events = { path = "../phonescope-events" }
-serde = { workspace = true }
-thiserror = { workspace = true }
-tokio = { workspace = true }
+phonescope-core    = { path = "../phonescope-core" }
+phonescope-adb     = { path = "../phonescope-adb" }
+phonescope-storage = { path = "../phonescope-storage" }
+phonescope-events  = { path = "../phonescope-events" }
+tauri.workspace           = true
+tauri-plugin-shell.workspace = true
+serde.workspace    = true
+serde_json.workspace = true
+tokio.workspace    = true
+thiserror.workspace = true
+tracing.workspace  = true
+chrono.workspace   = true
+rusqlite.workspace = true

@@ -1,8 +1,10 @@
-//! Tauri application entry point (stub — INT will wire commands).
+use phonescope_tauri::AppState;
 
 pub fn run() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_shell::init())
+    let state = AppState::new();
+
+    phonescope_tauri::build_app()
+        .manage(state)
         .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .expect("error while running PhoneScope");
 }
