@@ -1,0 +1,39 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/phonescope-events",
+    "crates/phonescope-adb",
+    "crates/phonescope-collectors",
+    "crates/phonescope-proxy",
+    "crates/phonescope-analytics",
+    "crates/phonescope-insights",
+    "crates/phonescope-storage",
+    "crates/phonescope-helper-protocol",
+    "crates/phonescope-process",
+    "crates/phonescope-usage",
+    "crates/phonescope-core",
+    "crates/phonescope-tauri",
+    "apps/desktop/src-tauri",
+    "xtask",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+anyhow = "1"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

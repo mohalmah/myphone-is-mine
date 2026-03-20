@@ -1,0 +1,6 @@
+[package]
+name = "phonescope-helper-protocol"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]

@@ -1,0 +1,6 @@
+[package]
+name = "phonescope-proxy"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]

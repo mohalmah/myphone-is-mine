@@ -1,0 +1,6 @@
+[package]
+name = "phonescope-adb"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]

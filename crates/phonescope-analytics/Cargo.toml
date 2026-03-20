@@ -1,0 +1,6 @@
+[package]
+name = "phonescope-analytics"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]

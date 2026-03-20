@@ -1,0 +1,6 @@
+[package]
+name = "phonescope-tauri"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]

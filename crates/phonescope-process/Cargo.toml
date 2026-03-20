@@ -1,0 +1,6 @@
+[package]
+name = "phonescope-process"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
