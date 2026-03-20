@@ -1,0 +1,12 @@
+--------- beginning of main
+--------- beginning of system
+03-20 12:00:00.000  1000  1001 I ActivityManager: Start proc 2345:com.example.app/u0a123 for activity com.example.app/.MainActivity
+03-20 12:00:00.100  2345  2345 D com.example.app: onCreate called
+03-20 12:00:00.200  2345  2346 V Choreographer: Skipped 2 frames!  The application may be doing too much work on its main thread.
+03-20 12:00:01.000  2345  2347 W NetworkSecurityConfig: No Network Security Config specified, using platform default
+03-20 12:00:01.500  2345  2348 E CrashHandler: FATAL EXCEPTION: main
+03-20 12:00:01.501  2345  2348 E CrashHandler: Process: com.example.app, PID: 2345
+03-20 12:00:01.502  2345  2348 E CrashHandler: java.lang.NullPointerException: Attempt to invoke virtual method on a null object reference
+03-20 12:00:01.503  2345  2348 E CrashHandler: 	at com.example.app.MainActivity.onClick(MainActivity.java:55)
+03-20 12:00:02.000  1000  1001 I ActivityManager: Displayed com.example.app/.MainActivity: +1s300ms
+03-20 12:00:03.000   500   500 F InputDispatcher: Application is not responding. Waited 5000ms for com.example.app/com.example.app.MainActivity

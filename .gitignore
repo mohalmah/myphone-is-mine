@@ -1,0 +1,14 @@
+/target
+/apps/desktop/src-tauri/binaries/
+/apps/desktop/node_modules/
+/apps/desktop/dist/
+/apps/desktop/.tauri/
+*.env
+*.env.*
+!*.env.example
+.DS_Store
+Thumbs.db
+/apps/android/.gradle/
+/apps/android/build/
+/apps/android/app/build/
+*.keystore

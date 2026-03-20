@@ -1,0 +1,31 @@
+--------- beginning of main
+--------- beginning of system
+03-20 12:00:00.001  1000  1000 I SystemServer: Entered the Android system server!
+03-20 12:00:00.015  1000  1000 I PackageManager: No packages need to be updated
+03-20 12:00:00.100  1234  1235 D WifiService: WifiService starting up. clientMode=0
+03-20 12:00:01.000  2000  2001 W ActivityManager: Activity destroy timeout for ActivityRecord{...}
+03-20 12:00:01.100  9999  9999 E AndroidRuntime: FATAL EXCEPTION: main
+03-20 12:00:01.101  9999  9999 E AndroidRuntime: Process: com.example.badapp, PID: 9999
+03-20 12:00:01.102  9999  9999 E AndroidRuntime: java.lang.NullPointerException: Attempt to invoke virtual method
+03-20 12:00:01.103  9999  9999 E AndroidRuntime: 	at com.example.badapp.MainActivity.onClick(MainActivity.java:42)
+03-20 12:00:02.000   500   501 V Choreographer: Skipped 35 frames!  The application may be doing too much work on its main thread.
+03-20 12:00:02.500  3000  3001 I BatteryService: update start
+03-20 12:00:03.000  3000  3001 I BatteryService: level=85, status=2, health=2, present=true, voltage=4200, temperature=280
+03-20 12:00:03.100  4000  4001 D Bluetooth: mState=STATE_ON
+03-20 12:00:03.200  5000  5001 W InputMethodManager: Ignoring setInputMethod
+03-20 12:00:03.300  6000  6001 F art: art/runtime/gc/heap.cc:2906] Couldn't allocate 4096 bytes
+03-20 12:00:04.000  7777  7778 I Zygote: Accepting command socket connections
+03-20 12:00:04.100  8888  8889 D OpenGLRenderer: Enabling debug mode 0
+03-20 12:00:04.200  1001  1001 I ActivityThread: Performing launch of r={...}
+03-20 12:00:04.300  1002  1003 W ViewRootImpl: Dropping event due to no window focus: MotionEvent
+03-20 12:00:05.000  1000  1000 I Watchdog: !@Sync 1000
+03-20 12:00:05.500   100   100 D libEGL: loaded /vendor/lib64/egl/libGLESv2_ANGLE.so
+03-20 12:00:06.000  1000  1050 I am_create_activity: [0,1234,1,com.example.app/.MainActivity,android.intent.action.MAIN,NULL,NULL,270532608]
+03-20 12:00:06.100  2345  2346 E NativeCrashListener: Couldn't find ProcessRecord for pid 12345
+03-20 12:00:06.200  3456  3457 V SurfaceControl: Excessive delay in time
+03-20 12:00:06.300  4567  4568 I Displayed com.example.app/.MainActivity: +257ms (total +512ms)
+03-20 12:00:07.000  9876  9877 W netd    : argv[1] = --log-level
+03-20 12:00:07.100   333   334 D KeyguardUpdateMonitor: handleSubInfoChanged
+
+--------- beginning of kernel
+03-20 12:00:08.000     1     1 I klogd: <7>[ 1234.567890] init: Starting service 'logd'...

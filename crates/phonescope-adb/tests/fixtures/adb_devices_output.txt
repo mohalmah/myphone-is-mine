@@ -1,0 +1,5 @@
+List of devices attached
+emulator-5554          device product:sdk_gphone64_x86_64 model:sdk_gphone64_x86_64 device:generic_x86_64 transport_id:1
+R58M31KABCD            device product:cheetah model:Pixel_7_Pro device:cheetah transport_id:2
+DEADBEEF0001           offline
+AUTH12345678           unauthorized

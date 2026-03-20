@@ -1,0 +1,12 @@
+package:/data/app/~~AAABBBCCC/com.example.myapp-XyZaB12345==/base.apk=com.example.myapp
+package:/data/app/~~DDDEEEFFFGGG/com.google.android.gms-XyZaB67890==/base.apk=com.google.android.gms
+package:/data/app/~~HHHJJJ/com.android.chrome-A1B2C3==/base.apk=com.android.chrome
+package:/system/priv-app/Launcher3QuickStep/Launcher3QuickStep.apk=com.android.launcher3
+package:/system/framework/framework-res.apk=android
+package:/system/priv-app/Settings/Settings.apk=com.android.settings
+package:/system/app/TeleService/TeleService.apk=com.android.phone
+package:/vendor/app/SomeVendorApp/SomeVendorApp.apk=com.vendor.someapp
+package:/product/app/GoogleServicesFramework/GoogleServicesFramework.apk=com.google.android.gsf
+package:/apex/com.android.tethering/priv-app/ServiceConnectivityResources/ServiceConnectivityResources.apk=com.android.connectivity.resources
+package:/data/app/~~KKKLLLMMM/com.instagram.android-NNNPPP==/base.apk=com.instagram.android
+package:/data/app/~~QQQRRR/org.mozilla.firefox-SSSTTT==/base.apk=org.mozilla.firefox
