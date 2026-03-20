@@ -8,7 +8,6 @@ use commands::{apps, device, logs, session, settings};
 /// Build and return the configured Tauri Builder.
 pub fn build_app() -> tauri::Builder<tauri::Wry> {
     tauri::Builder::default()
-        .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
             // Device
             device::list_devices,

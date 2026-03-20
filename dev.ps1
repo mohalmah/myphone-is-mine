@@ -54,14 +54,12 @@ if ($cargoPath) {
     Write-OK "cargo $cargoVer"
 } else {
     Write-Warn "Rust/Cargo not found."
-    Write-Host @"
-
-   To install Rust on Windows, run:
-       winget install Rustlang.Rustup
-   or visit https://rustup.rs and run the installer.
-
-   After installing, RESTART this terminal and run .\dev.ps1 again.
-"@
+    Write-Host ""
+    Write-Host "   To install Rust on Windows, run:"
+    Write-Host "       winget install Rustlang.Rustup"
+    Write-Host "   or visit https://rustup.rs and run the installer."
+    Write-Host ""
+    Write-Host "   After installing, RESTART this terminal and run .\dev.ps1 again."
     $choice = Read-Host "   Open rustup.rs in browser? [Y/n]"
     if ($choice -ne 'n' -and $choice -ne 'N') {
         Start-Process "https://rustup.rs"
@@ -101,16 +99,14 @@ if (-not (Test-Path (Join-Path $desktopDir "node_modules"))) {
 
 # ── 5. Start Tauri dev ────────────────────────────────────────────────────────
 Write-Step "Starting PhoneScope (Tauri dev mode)"
-Write-Host @"
-
-   This will:
-     1. Compile the Rust backend (first run takes a few minutes)
-     2. Start the Vite frontend dev server on http://localhost:1420
-     3. Open the native PhoneScope window
-
-   Press Ctrl+C to stop.
-
-"@ -ForegroundColor Gray
+Write-Host ""
+Write-Host "   This will:" -ForegroundColor Gray
+Write-Host "     1. Compile the Rust backend (first run takes a few minutes)" -ForegroundColor Gray
+Write-Host "     2. Start the Vite frontend dev server on http://localhost:1420" -ForegroundColor Gray
+Write-Host "     3. Open the native PhoneScope window" -ForegroundColor Gray
+Write-Host ""
+Write-Host "   Press Ctrl+C to stop." -ForegroundColor Gray
+Write-Host ""
 
 Push-Location $desktopDir
 try {

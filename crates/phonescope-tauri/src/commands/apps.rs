@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use tauri::State;
 use crate::state::AppState;
-use phonescope_storage::models::PackageRow;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PackageDto {
@@ -12,20 +11,6 @@ pub struct PackageDto {
     pub version_code: Option<i64>,
     pub is_system: bool,
     pub is_enabled: bool,
-}
-
-impl From<PackageRow> for PackageDto {
-    fn from(r: PackageRow) -> Self {
-        Self {
-            id: r.id,
-            package_name: r.package_name,
-            app_label: r.app_label,
-            version_name: r.version_name,
-            version_code: r.version_code,
-            is_system: r.is_system,
-            is_enabled: r.is_enabled,
-        }
-    }
 }
 
 /// List all packages for the device owning this session.

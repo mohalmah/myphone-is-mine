@@ -19,3 +19,6 @@ phonescope-tauri = { path = "../../../crates/phonescope-tauri" }
 tauri = { workspace = true }
 tauri-plugin-shell = { workspace = true }
 serde = { workspace = true }
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
