@@ -1,0 +1,570 @@
+/**
+ * IPC service — wraps @tauri-apps/api/core invoke calls with typed parameters
+ * and return values matching the taurpc-generated Rust command signatures.
+ *
+ * Pattern: ipc.<commandGroup>.<commandName>(args)
+ *
+ * All functions return typed Promises. Zod schemas validate at the boundary
+ * to catch mismatches between Rust and TypeScript types early.
+ */
+
+import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
+import type {
+  AppSettings,
+  AppStorageBreakdown,
+  AppUsageRecord,
+  BatterySample,
+  BatteryStats,
+  CapabilityProfile,
+  CollectorStatus,
+  DeviceEvent,
+  DeviceInfo,
+  DnsQuery,
+  DomainBreakdown,
+  GoalProgress,
+  HttpRequest,
+  Insight,
+  LogEntry,
+  LogFilter,
+  NetworkFlow,
+  Package,
+  PackageDetail,
+  ProcessSnapshot,
+  ProxyStatus,
+  SessionInfo,
+  StorageOverview,
+  SystemResources,
+  ThermalSample,
+  TopAppByTraffic,
+  UsageGoal,
+  UsageSnapshot,
+  UsageSummary,
+} from '@/types';
+
+// ─── Device Commands ──────────────────────────────────────────────────────────
+
+export const deviceCommands = {
+  list_devices: (): Promise<DeviceInfo[]> =>
+    invoke('plugin:phonescope|list_devices'),
+
+  connect_device: (serial: string): Promise<SessionInfo> =>
+    invoke('plugin:phonescope|connect_device', { serial }),
+
+  disconnect_device: (serial: string): Promise<void> =>
+    invoke('plugin:phonescope|disconnect_device', { serial }),
+
+  get_capabilities: (serial: string): Promise<CapabilityProfile> =>
+    invoke('plugin:phonescope|get_capabilities', { serial }),
+};
+
+// ─── Session Commands ─────────────────────────────────────────────────────────
+
+export const sessionCommands = {
+  get_active_sessions: (): Promise<SessionInfo[]> =>
+    invoke('plugin:phonescope|get_active_sessions'),
+
+  get_session_history: (deviceId: number): Promise<SessionInfo[]> =>
+    invoke('plugin:phonescope|get_session_history', { device_id: deviceId }),
+
+  start_session: (serial: string): Promise<SessionInfo> =>
+    invoke('plugin:phonescope|start_session', { serial }),
+
+  stop_session: (sessionId: number): Promise<void> =>
+    invoke('plugin:phonescope|stop_session', { session_id: sessionId }),
+};
+
+// ─── App Commands ─────────────────────────────────────────────────────────────
+
+export const appCommands = {
+  list_packages: (sessionId: number): Promise<Package[]> =>
+    invoke('plugin:phonescope|list_packages', { session_id: sessionId }),
+
+  get_package_detail: (
+    sessionId: number,
+    packageName: string,
+  ): Promise<PackageDetail> =>
+    invoke('plugin:phonescope|get_package_detail', {
+      session_id: sessionId,
+      package_name: packageName,
+    }),
+
+  force_stop: (sessionId: number, packageName: string): Promise<void> =>
+    invoke('plugin:phonescope|force_stop', {
+      session_id: sessionId,
+      package_name: packageName,
+    }),
+
+  clear_data: (sessionId: number, packageName: string): Promise<void> =>
+    invoke('plugin:phonescope|clear_data', {
+      session_id: sessionId,
+      package_name: packageName,
+    }),
+
+  disable_app: (sessionId: number, packageName: string): Promise<void> =>
+    invoke('plugin:phonescope|disable_app', {
+      session_id: sessionId,
+      package_name: packageName,
+    }),
+
+  uninstall_app: (
+    sessionId: number,
+    packageName: string,
+    keepData: boolean,
+  ): Promise<void> =>
+    invoke('plugin:phonescope|uninstall_app', {
+      session_id: sessionId,
+      package_name: packageName,
+      keep_data: keepData,
+    }),
+
+  revoke_permission: (
+    sessionId: number,
+    packageName: string,
+    permission: string,
+  ): Promise<void> =>
+    invoke('plugin:phonescope|revoke_permission', {
+      session_id: sessionId,
+      package_name: packageName,
+      permission,
+    }),
+
+  grant_permission: (
+    sessionId: number,
+    packageName: string,
+    permission: string,
+  ): Promise<void> =>
+    invoke('plugin:phonescope|grant_permission', {
+      session_id: sessionId,
+      package_name: packageName,
+      permission,
+    }),
+};
+
+// ─── Log Commands ─────────────────────────────────────────────────────────────
+
+export const logCommands = {
+  get_logs: (sessionId: number, filter: LogFilter): Promise<LogEntry[]> =>
+    invoke('plugin:phonescope|get_logs', { session_id: sessionId, filter }),
+
+  get_log_tags: (sessionId: number): Promise<string[]> =>
+    invoke('plugin:phonescope|get_log_tags', { session_id: sessionId }),
+
+  clear_log_buffer: (sessionId: number): Promise<void> =>
+    invoke('plugin:phonescope|clear_log_buffer', { session_id: sessionId }),
+};
+
+// ─── Network Commands ─────────────────────────────────────────────────────────
+
+export const networkCommands = {
+  get_flows: (
+    sessionId: number,
+    limit?: number,
+    offset?: number,
+  ): Promise<NetworkFlow[]> =>
+    invoke('plugin:phonescope|get_flows', {
+      session_id: sessionId,
+      limit: limit ?? 100,
+      offset: offset ?? 0,
+    }),
+
+  get_requests: (
+    sessionId: number,
+    limit?: number,
+    offset?: number,
+  ): Promise<HttpRequest[]> =>
+    invoke('plugin:phonescope|get_requests', {
+      session_id: sessionId,
+      limit: limit ?? 100,
+      offset: offset ?? 0,
+    }),
+
+  get_dns_queries: (
+    sessionId: number,
+    limit?: number,
+  ): Promise<DnsQuery[]> =>
+    invoke('plugin:phonescope|get_dns_queries', {
+      session_id: sessionId,
+      limit: limit ?? 200,
+    }),
+
+  get_domain_breakdown: (sessionId: number): Promise<DomainBreakdown[]> =>
+    invoke('plugin:phonescope|get_domain_breakdown', {
+      session_id: sessionId,
+    }),
+
+  get_top_apps_by_traffic: (
+    sessionId: number,
+    limit?: number,
+  ): Promise<TopAppByTraffic[]> =>
+    invoke('plugin:phonescope|get_top_apps_by_traffic', {
+      session_id: sessionId,
+      limit: limit ?? 10,
+    }),
+};
+
+// ─── Storage Commands ─────────────────────────────────────────────────────────
+
+export const storageCommands = {
+  get_storage_overview: (sessionId: number): Promise<StorageOverview> =>
+    invoke('plugin:phonescope|get_storage_overview', {
+      session_id: sessionId,
+    }),
+
+  get_app_storage_breakdown: (
+    sessionId: number,
+  ): Promise<AppStorageBreakdown[]> =>
+    invoke('plugin:phonescope|get_app_storage_breakdown', {
+      session_id: sessionId,
+    }),
+
+  get_folder_sizes: (
+    sessionId: number,
+    packageName?: string,
+  ): Promise<AppStorageBreakdown[]> =>
+    invoke('plugin:phonescope|get_folder_sizes', {
+      session_id: sessionId,
+      package_name: packageName ?? null,
+    }),
+};
+
+// ─── Battery Commands ─────────────────────────────────────────────────────────
+
+export const batteryCommands = {
+  get_current_battery: (sessionId: number): Promise<BatteryStats> =>
+    invoke('plugin:phonescope|get_current_battery', {
+      session_id: sessionId,
+    }),
+
+  get_battery_timeline: (
+    sessionId: number,
+    limit?: number,
+  ): Promise<BatterySample[]> =>
+    invoke('plugin:phonescope|get_battery_timeline', {
+      session_id: sessionId,
+      limit: limit ?? 288,
+    }),
+
+  get_battery_stats: (sessionId: number): Promise<BatteryStats> =>
+    invoke('plugin:phonescope|get_battery_stats', { session_id: sessionId }),
+};
+
+// ─── Process Commands ─────────────────────────────────────────────────────────
+
+export const processCommands = {
+  get_process_snapshot: (sessionId: number): Promise<ProcessSnapshot> =>
+    invoke('plugin:phonescope|get_process_snapshot', {
+      session_id: sessionId,
+    }),
+
+  get_thermal_samples: (
+    sessionId: number,
+    limit?: number,
+  ): Promise<ThermalSample[]> =>
+    invoke('plugin:phonescope|get_thermal_samples', {
+      session_id: sessionId,
+      limit: limit ?? 100,
+    }),
+
+  get_system_resources: (sessionId: number): Promise<SystemResources> =>
+    invoke('plugin:phonescope|get_system_resources', {
+      session_id: sessionId,
+    }),
+};
+
+// ─── Proxy Commands ───────────────────────────────────────────────────────────
+
+export const proxyCommands = {
+  start_proxy: (port?: number): Promise<void> =>
+    invoke('plugin:phonescope|start_proxy', { port: port ?? 8080 }),
+
+  stop_proxy: (): Promise<void> =>
+    invoke('plugin:phonescope|stop_proxy'),
+
+  get_proxy_status: (): Promise<ProxyStatus> =>
+    invoke('plugin:phonescope|get_proxy_status'),
+
+  install_ca_cert: (serial: string): Promise<void> =>
+    invoke('plugin:phonescope|install_ca_cert', { serial }),
+
+  configure_device_proxy: (serial: string, host: string, port: number): Promise<void> =>
+    invoke('plugin:phonescope|configure_device_proxy', { serial, host, port }),
+};
+
+// ─── Insight Commands ─────────────────────────────────────────────────────────
+
+export const insightCommands = {
+  get_insights: (
+    sessionId: number,
+    limit?: number,
+  ): Promise<Insight[]> =>
+    invoke('plugin:phonescope|get_insights', {
+      session_id: sessionId,
+      limit: limit ?? 50,
+    }),
+
+  get_insight_categories: (sessionId: number): Promise<string[]> =>
+    invoke('plugin:phonescope|get_insight_categories', {
+      session_id: sessionId,
+    }),
+
+  dismiss_insight: (insightId: number): Promise<void> =>
+    invoke('plugin:phonescope|dismiss_insight', { insight_id: insightId }),
+};
+
+// ─── Usage Commands ───────────────────────────────────────────────────────────
+
+export const usageCommands = {
+  get_usage_summary: (
+    sessionId: number,
+    periodStart: string,
+    periodEnd: string,
+  ): Promise<UsageSummary> =>
+    invoke('plugin:phonescope|get_usage_summary', {
+      session_id: sessionId,
+      period_start: periodStart,
+      period_end: periodEnd,
+    }),
+
+  get_top_apps: (
+    sessionId: number,
+    periodStart: string,
+    periodEnd: string,
+    limit?: number,
+  ): Promise<AppUsageRecord[]> =>
+    invoke('plugin:phonescope|get_top_apps', {
+      session_id: sessionId,
+      period_start: periodStart,
+      period_end: periodEnd,
+      limit: limit ?? 10,
+    }),
+
+  get_hourly_distribution: (
+    sessionId: number,
+    date: string,
+  ): Promise<{ hour: number; screen_on_ms: number }[]> =>
+    invoke('plugin:phonescope|get_hourly_distribution', {
+      session_id: sessionId,
+      date,
+    }),
+
+  compare_periods: (
+    sessionId: number,
+    periodA: { start: string; end: string },
+    periodB: { start: string; end: string },
+  ): Promise<{ period_a: UsageSummary; period_b: UsageSummary }> =>
+    invoke('plugin:phonescope|compare_periods', {
+      session_id: sessionId,
+      period_a: periodA,
+      period_b: periodB,
+    }),
+
+  trigger_snapshot: (
+    sessionId: number,
+    snapshotType: 'hourly' | 'daily' | 'weekly' | 'manual',
+  ): Promise<number> =>
+    invoke('plugin:phonescope|trigger_snapshot', {
+      session_id: sessionId,
+      snapshot_type: snapshotType,
+    }),
+
+  list_snapshots: (deviceId: number, limit?: number): Promise<UsageSnapshot[]> =>
+    invoke('plugin:phonescope|list_snapshots', {
+      device_id: deviceId,
+      limit: limit ?? 100,
+    }),
+
+  create_goal: (
+    deviceId: number,
+    packageId: number | null,
+    dailyLimitMs: number,
+  ): Promise<UsageGoal> =>
+    invoke('plugin:phonescope|create_goal', {
+      device_id: deviceId,
+      package_id: packageId,
+      daily_limit_ms: dailyLimitMs,
+    }),
+
+  update_goal: (
+    goalId: number,
+    dailyLimitMs: number,
+    isActive: boolean,
+  ): Promise<void> =>
+    invoke('plugin:phonescope|update_goal', {
+      goal_id: goalId,
+      daily_limit_ms: dailyLimitMs,
+      is_active: isActive,
+    }),
+
+  delete_goal: (goalId: number): Promise<void> =>
+    invoke('plugin:phonescope|delete_goal', { goal_id: goalId }),
+
+  get_goal_progress: (
+    sessionId: number,
+    date: string,
+  ): Promise<GoalProgress[]> =>
+    invoke('plugin:phonescope|get_goal_progress', {
+      session_id: sessionId,
+      date,
+    }),
+};
+
+// ─── Settings Commands ────────────────────────────────────────────────────────
+
+export const settingsCommands = {
+  get_settings: (): Promise<AppSettings> =>
+    invoke('plugin:phonescope|get_settings'),
+
+  update_settings: (settings: Partial<AppSettings>): Promise<void> =>
+    invoke('plugin:phonescope|update_settings', { settings }),
+
+  get_adb_path: (): Promise<string | null> =>
+    invoke('plugin:phonescope|get_adb_path'),
+
+  set_adb_path: (path: string): Promise<void> =>
+    invoke('plugin:phonescope|set_adb_path', { path }),
+};
+
+// ─── Export Commands ──────────────────────────────────────────────────────────
+
+export const exportCommands = {
+  export_json: (
+    sessionId: number,
+    outputPath: string,
+  ): Promise<void> =>
+    invoke('plugin:phonescope|export_json', {
+      session_id: sessionId,
+      output_path: outputPath,
+    }),
+
+  export_csv: (
+    sessionId: number,
+    outputPath: string,
+  ): Promise<void> =>
+    invoke('plugin:phonescope|export_csv', {
+      session_id: sessionId,
+      output_path: outputPath,
+    }),
+
+  export_har: (
+    sessionId: number,
+    outputPath: string,
+  ): Promise<void> =>
+    invoke('plugin:phonescope|export_har', {
+      session_id: sessionId,
+      output_path: outputPath,
+    }),
+
+  generate_report: (
+    sessionId: number,
+    outputPath: string,
+  ): Promise<void> =>
+    invoke('plugin:phonescope|generate_report', {
+      session_id: sessionId,
+      output_path: outputPath,
+    }),
+
+  export_usage_csv: (
+    deviceId: number,
+    outputPath: string,
+  ): Promise<void> =>
+    invoke('plugin:phonescope|export_usage_csv', {
+      device_id: deviceId,
+      output_path: outputPath,
+    }),
+};
+
+// ─── Real-Time Events (Rust → Frontend) ──────────────────────────────────────
+
+export const events = {
+  onDeviceEvent: (
+    callback: (event: DeviceEvent) => void,
+  ): Promise<() => void> =>
+    listen<DeviceEvent>('phonescope://device_event', (e) =>
+      callback(e.payload),
+    ),
+
+  onDeviceConnected: (
+    callback: (info: DeviceInfo) => void,
+  ): Promise<() => void> =>
+    listen<DeviceInfo>('phonescope://device_connected', (e) =>
+      callback(e.payload),
+    ),
+
+  onDeviceDisconnected: (
+    callback: (serial: string) => void,
+  ): Promise<() => void> =>
+    listen<string>('phonescope://device_disconnected', (e) =>
+      callback(e.payload),
+    ),
+
+  onSessionStarted: (
+    callback: (info: SessionInfo) => void,
+  ): Promise<() => void> =>
+    listen<SessionInfo>('phonescope://session_started', (e) =>
+      callback(e.payload),
+    ),
+
+  onSessionEnded: (
+    callback: (sessionId: number) => void,
+  ): Promise<() => void> =>
+    listen<number>('phonescope://session_ended', (e) =>
+      callback(e.payload),
+    ),
+
+  onCapabilityDetected: (
+    callback: (profile: CapabilityProfile) => void,
+  ): Promise<() => void> =>
+    listen<CapabilityProfile>('phonescope://capability_detected', (e) =>
+      callback(e.payload),
+    ),
+
+  onInsightGenerated: (
+    callback: (insight: Insight) => void,
+  ): Promise<() => void> =>
+    listen<Insight>('phonescope://insight_generated', (e) =>
+      callback(e.payload),
+    ),
+
+  onCollectorStatusChanged: (
+    callback: (status: CollectorStatus) => void,
+  ): Promise<() => void> =>
+    listen<CollectorStatus>('phonescope://collector_status_changed', (e) =>
+      callback(e.payload),
+    ),
+
+  onProxyStatusChanged: (
+    callback: (running: boolean) => void,
+  ): Promise<() => void> =>
+    listen<boolean>('phonescope://proxy_status_changed', (e) =>
+      callback(e.payload),
+    ),
+
+  onUsageSnapshotCaptured: (
+    callback: (snapshotId: number) => void,
+  ): Promise<() => void> =>
+    listen<number>('phonescope://usage_snapshot_captured', (e) =>
+      callback(e.payload),
+    ),
+};
+
+// ─── Unified IPC object ───────────────────────────────────────────────────────
+
+export const ipc = {
+  deviceCommands,
+  sessionCommands,
+  appCommands,
+  logCommands,
+  networkCommands,
+  storageCommands,
+  batteryCommands,
+  processCommands,
+  proxyCommands,
+  insightCommands,
+  usageCommands,
+  settingsCommands,
+  exportCommands,
+  events,
+};
+
+export default ipc;
