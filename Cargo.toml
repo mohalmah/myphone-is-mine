@@ -1,0 +1,47 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/phonescope-core",
+    "crates/phonescope-adb",
+    "crates/phonescope-collectors",
+    "crates/phonescope-proxy",
+    "crates/phonescope-events",
+    "crates/phonescope-analytics",
+    "crates/phonescope-insights",
+    "crates/phonescope-storage",
+    "crates/phonescope-helper-protocol",
+    "crates/phonescope-process",
+    "crates/phonescope-usage",
+    "crates/phonescope-tauri",
+    "apps/desktop/src-tauri",
+    "xtask",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+rust-version = "1.82"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "2"
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+rusqlite = { version = "0.32", features = ["bundled", "serde_json"] }
+rusqlite_migration = "2.4"
+tokio-tungstenite = "0.24"
+uuid = { version = "1", features = ["v4", "serde"] }
+taurpc = "0.5"
+tauri = "2"
+tauri-plugin-shell = "2"
+specta = "2"
+bitflags = "2"
+async-trait = "0.1"
+futures = "0.3"
+r2d2 = "0.8"
+r2d2_sqlite = "0.25"
