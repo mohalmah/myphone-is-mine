@@ -1,0 +1,16 @@
+[package]
+name = "phonescope-collectors"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "All data collectors for PhoneScope"
+
+[dependencies]
+phonescope-events = { path = "../phonescope-events" }
+phonescope-adb = { path = "../phonescope-adb" }
+serde = { workspace = true }
+tokio = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+async-trait = { workspace = true }

@@ -1,0 +1,12 @@
+[package]
+name = "phonescope-analytics"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Aggregation, scoring, and patterns for PhoneScope"
+
+[dependencies]
+phonescope-events = { path = "../phonescope-events" }
+serde = { workspace = true }
+thiserror = { workspace = true }

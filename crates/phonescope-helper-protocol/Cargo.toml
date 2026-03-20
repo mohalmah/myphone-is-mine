@@ -1,0 +1,12 @@
+[package]
+name = "phonescope-helper-protocol"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "WebSocket message types for PhoneScope helper protocol"
+
+[dependencies]
+phonescope-events = { path = "../phonescope-events" }
+serde = { workspace = true }
+serde_json = { workspace = true }

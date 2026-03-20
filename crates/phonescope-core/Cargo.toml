@@ -1,0 +1,22 @@
+[package]
+name = "phonescope-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Orchestrator, session management, and capability detection for PhoneScope"
+
+[dependencies]
+phonescope-events = { path = "../phonescope-events" }
+phonescope-adb = { path = "../phonescope-adb" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+chrono = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
+bitflags = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }

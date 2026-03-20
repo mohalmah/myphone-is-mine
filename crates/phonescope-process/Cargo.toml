@@ -1,0 +1,14 @@
+[package]
+name = "phonescope-process"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Process/CPU/RAM/thermal monitoring for PhoneScope"
+
+[dependencies]
+phonescope-events = { path = "../phonescope-events" }
+phonescope-adb = { path = "../phonescope-adb" }
+serde = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }

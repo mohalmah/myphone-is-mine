@@ -1,0 +1,13 @@
+[package]
+name = "phonescope-usage"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "App usage tracking and snapshots for PhoneScope"
+
+[dependencies]
+phonescope-events = { path = "../phonescope-events" }
+serde = { workspace = true }
+thiserror = { workspace = true }
+chrono = { workspace = true }

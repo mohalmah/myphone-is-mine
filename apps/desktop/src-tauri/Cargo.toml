@@ -1,0 +1,21 @@
+[package]
+name = "phonescope-desktop"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "PhoneScope desktop application (Tauri shell)"
+
+[lib]
+name = "phonescope_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "phonescope-desktop"
+path = "src/main.rs"
+
+[dependencies]
+phonescope-tauri = { path = "../../../crates/phonescope-tauri" }
+tauri = { workspace = true }
+tauri-plugin-shell = { workspace = true }
+serde = { workspace = true }
