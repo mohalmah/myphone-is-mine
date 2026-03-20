@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useSessionStore } from '@/stores/sessionStore';
-import { useLogStream, useLogTags } from '@/hooks/useLogs';
+import { useLogStream } from '@/hooks/useLogs';
 import { LogLevelBadge } from '@/components/common/Badge';
 import { Toggle } from '@/components/common/Toggle';
 import { formatTimestamp } from '@/services/formatters';
