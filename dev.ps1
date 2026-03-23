@@ -111,8 +111,7 @@ Write-Host ""
 Push-Location $desktopDir
 try {
     # Add .cargo/bin to PATH for this session in case it wasn't in PATH
-    $cargoBin = Split-Path $cargoPath
-    $env:PATH = "$cargoBin;$env:PATH"
+    $env:PATH = "$env:USERPROFILE\.cargo\bin;$env:PATH"
 
     pnpm tauri dev
 } finally {

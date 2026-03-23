@@ -3,7 +3,6 @@ import { useSessionStore } from '@/stores/sessionStore';
 import { useUsageSummary } from '@/hooks/useUsage';
 import { formatDuration, formatTimestamp } from '@/services/formatters';
 import { useUIStore } from '@/stores/uiStore';
-import { MOCK_USAGE_SUMMARY } from '@/services/mockData';
 
 export default function UsagePage() {
   const activeSession = useSessionStore((s) => s.activeSession);
@@ -19,27 +18,29 @@ export default function UsagePage() {
     today.toISOString(),
   );
 
-  const displaySummary = summary ?? MOCK_USAGE_SUMMARY;
+  const displaySummary = summary ?? null;
 
   return (
     <div className="p-4 space-y-6">
       <h1 className="text-xl font-bold text-gray-900 dark:text-white">App Usage</h1>
 
       {/* Screen time summary */}
-      <section className="grid grid-cols-2 gap-3">
-        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Screen Time (24h)</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
-            {formatDuration(displaySummary.total_screen_on_ms, friendlyMode)}
-          </p>
-        </div>
-        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Unlocks (24h)</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
-            {displaySummary.unlock_count}
-          </p>
-        </div>
-      </section>
+      {displaySummary && (
+        <section className="grid grid-cols-2 gap-3">
+          <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Screen Time (24h)</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {formatDuration(displaySummary.total_screen_on_ms, friendlyMode)}
+            </p>
+          </div>
+          <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Unlocks (24h)</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {displaySummary.unlock_count}
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* Top apps */}
       <section>
@@ -47,7 +48,7 @@ export default function UsagePage() {
           Top Apps by Screen Time
         </h2>
         <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-800">
-          {displaySummary.top_apps.map((app) => {
+          {displaySummary ? displaySummary.top_apps.map((app) => {
             const totalMs = displaySummary.total_screen_on_ms || 1;
             const pct = Math.round((app.foreground_time_ms / totalMs) * 100);
             return (
@@ -74,8 +75,12 @@ export default function UsagePage() {
                 </div>
               </div>
             );
-          })}
-          {displaySummary.top_apps.length === 0 && (
+          }) : (
+            <p className="px-4 py-8 text-sm text-center text-gray-500 dark:text-gray-400">
+              No usage data available.
+            </p>
+          )}
+          {displaySummary && displaySummary.top_apps.length === 0 && (
             <p className="px-4 py-8 text-sm text-center text-gray-500 dark:text-gray-400">
               No usage data available.
             </p>

@@ -5,8 +5,6 @@ import { Badge } from '@/components/common/Badge';
 import { formatTimestamp } from '@/services/formatters';
 import { useUIStore } from '@/stores/uiStore';
 import type { HttpRequest } from '@/types';
-import { MOCK_HTTP_REQUESTS } from '@/services/mockData';
-
 function StatusCodeBadge({ code }: { code: number | null }) {
   if (!code) return <span className="text-gray-400">—</span>;
   const variant =
@@ -20,7 +18,7 @@ export default function RequestsPage() {
   const friendlyMode = useUIStore((s) => s.friendlyMode);
 
   const { data: requests } = useHttpRequests(sessionId);
-  const displayRequests = requests ?? MOCK_HTTP_REQUESTS;
+  const displayRequests = requests ?? [];
 
   const [selected, setSelected] = useState<HttpRequest | null>(null);
   const [search, setSearch] = useState('');

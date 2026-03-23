@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useLogStream } from '@/hooks/useLogs';
@@ -6,8 +6,7 @@ import { LogLevelBadge } from '@/components/common/Badge';
 import { Toggle } from '@/components/common/Toggle';
 import { formatTimestamp } from '@/services/formatters';
 import { useUIStore } from '@/stores/uiStore';
-import type { LogLevel } from '@/types';
-import { generateMockLogs } from '@/services/mockData';
+import type { LogEntry, LogLevel } from '@/types';
 
 const ALL_LEVELS: LogLevel[] = ['V', 'D', 'I', 'W', 'E', 'F'];
 
@@ -20,15 +19,115 @@ const LEVEL_COLORS: Record<LogLevel, string> = {
   F: 'text-red-700 dark:text-red-300',
 };
 
+const LEVEL_BG: Record<LogLevel, string> = {
+  V: '',
+  D: '',
+  I: '',
+  W: 'bg-yellow-50/40 dark:bg-yellow-900/10',
+  E: 'bg-red-50/40 dark:bg-red-900/10',
+  F: 'bg-red-100/60 dark:bg-red-900/20',
+};
+
+// ─── Log row component (used in both flat and grouped views) ─────────────────
+
+function LogRow({ log, friendly }: { log: LogEntry; friendly: boolean }) {
+  return (
+    <div className={`flex items-start gap-2 px-3 py-1 border-b border-gray-50 dark:border-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 ${LEVEL_BG[log.level]}`}>
+      <span className="text-gray-400 w-20 flex-shrink-0 text-xs">
+        {friendly
+          ? formatTimestamp(log.captured_at, true)
+          : new Date(log.captured_at).toISOString().slice(11, 23)}
+      </span>
+      <span className="w-6 flex-shrink-0">
+        <LogLevelBadge level={log.level} />
+      </span>
+      <span className="text-purple-600 dark:text-purple-400 w-32 flex-shrink-0 truncate text-xs">
+        {log.tag ?? '—'}
+      </span>
+      <span className={`flex-1 break-all text-xs ${LEVEL_COLORS[log.level]}`}>
+        {log.message}
+      </span>
+      {!friendly && log.pid && (
+        <span className="text-gray-400 flex-shrink-0 text-xs">
+          {log.pid}/{log.tid}
+        </span>
+      )}
+    </div>
+  );
+}
+
+// ─── Grouped view ─────────────────────────────────────────────────────────────
+
+interface TagGroup {
+  tag: string;
+  entries: LogEntry[];
+  topLevel: LogLevel;
+}
+
+function GroupedView({
+  groups,
+  friendly,
+}: {
+  groups: TagGroup[];
+  friendly: boolean;
+}) {
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  const toggle = (tag: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag)) next.delete(tag);
+      else next.add(tag);
+      return next;
+    });
+  };
+
+  return (
+    <div className="flex-1 overflow-auto font-mono text-xs">
+      {groups.map((g) => (
+        <div key={g.tag} className="border-b border-gray-100 dark:border-gray-800">
+          {/* Group header */}
+          <button
+            type="button"
+            className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 text-left"
+            onClick={() => toggle(g.tag)}
+          >
+            <span className="text-gray-400 w-4 flex-shrink-0">
+              {expanded.has(g.tag) ? '▼' : '▶'}
+            </span>
+            <span className={`w-6 flex-shrink-0`}>
+              <LogLevelBadge level={g.topLevel} />
+            </span>
+            <span className="font-medium text-purple-600 dark:text-purple-400 flex-1 truncate">
+              {g.tag}
+            </span>
+            <span className="text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded text-xs">
+              {g.entries.length}
+            </span>
+          </button>
+
+          {/* Group entries */}
+          {expanded.has(g.tag) && (
+            <div className="pl-4 bg-gray-50/50 dark:bg-gray-900/30">
+              {g.entries.map((log) => (
+                <LogRow key={log.id} log={log} friendly={friendly} />
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
 export default function LogsPage() {
   const activeSession = useSessionStore((s) => s.activeSession);
   const friendlyMode = useUIStore((s) => s.friendlyMode);
 
   const sessionId = activeSession?.id ?? null;
-  const { logs: streamLogs, paused, togglePause, clearLogs } = useLogStream(sessionId);
-
-  // Use mock data when no session active
-  const displayLogs = sessionId ? streamLogs : generateMockLogs(200);
+  const { logs: displayLogs, paused, togglePause, clearLogs } = useLogStream(sessionId);
 
   const [enabledLevels, setEnabledLevels] = useState<Set<LogLevel>>(
     new Set(ALL_LEVELS),
@@ -36,12 +135,13 @@ export default function LogsPage() {
   const [tagFilter, setTagFilter] = useState('');
   const [messageSearch, setMessageSearch] = useState('');
   const [autoScroll, setAutoScroll] = useState(true);
+  const [groupByTag, setGroupByTag] = useState(false);
 
   const parentRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Filter logs
-  const filteredLogs = displayLogs.filter((log) => {
+  const filteredLogs = useMemo(() => displayLogs.filter((log) => {
     if (!enabledLevels.has(log.level)) return false;
     if (tagFilter && !log.tag?.toLowerCase().includes(tagFilter.toLowerCase()))
       return false;
@@ -51,7 +151,26 @@ export default function LogsPage() {
     )
       return false;
     return true;
-  });
+  }), [displayLogs, enabledLevels, tagFilter, messageSearch]);
+
+  // Build tag groups (sorted by entry count desc)
+  const tagGroups = useMemo((): TagGroup[] => {
+    if (!groupByTag) return [];
+    const map = new Map<string, LogEntry[]>();
+    for (const log of filteredLogs) {
+      const key = log.tag ?? '(no tag)';
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(log);
+    }
+    return Array.from(map.entries())
+      .map(([tag, entries]) => {
+        // Pick highest severity level seen in this group
+        const levels: LogLevel[] = ['F', 'E', 'W', 'I', 'D', 'V'];
+        const topLevel = levels.find((l) => entries.some((e) => e.level === l)) ?? 'V';
+        return { tag, entries, topLevel };
+      })
+      .sort((a, b) => b.entries.length - a.entries.length);
+  }, [filteredLogs, groupByTag]);
 
   const virtualizer = useVirtualizer({
     count: filteredLogs.length,
@@ -60,12 +179,12 @@ export default function LogsPage() {
     overscan: 20,
   });
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom (flat mode only)
   useEffect(() => {
-    if (autoScroll && !paused && bottomRef.current) {
+    if (!groupByTag && autoScroll && !paused && bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'auto' });
     }
-  }, [filteredLogs.length, autoScroll, paused]);
+  }, [filteredLogs.length, autoScroll, paused, groupByTag]);
 
   const toggleLevel = (level: LogLevel) => {
     setEnabledLevels((prev) => {
@@ -123,10 +242,17 @@ export default function LogsPage() {
 
         <div className="ml-auto flex items-center gap-3">
           <Toggle
-            checked={autoScroll}
-            onChange={setAutoScroll}
-            label="Auto-scroll"
+            checked={groupByTag}
+            onChange={setGroupByTag}
+            label="Group by tag"
           />
+          {!groupByTag && (
+            <Toggle
+              checked={autoScroll}
+              onChange={setAutoScroll}
+              label="Auto-scroll"
+            />
+          )}
           <button
             type="button"
             onClick={togglePause}
@@ -150,59 +276,55 @@ export default function LogsPage() {
 
       {/* Count */}
       <div className="px-4 py-1 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
-        {filteredLogs.length.toLocaleString()} entries
+        {groupByTag
+          ? `${tagGroups.length} tags · ${filteredLogs.length.toLocaleString()} entries`
+          : `${filteredLogs.length.toLocaleString()} entries`}
         {filteredLogs.length !== displayLogs.length && ` (of ${displayLogs.length.toLocaleString()})`}
       </div>
 
-      {/* Virtual log table */}
-      <div ref={parentRef} className="flex-1 overflow-auto font-mono text-xs">
-        <div
-          style={{
-            height: `${virtualizer.getTotalSize()}px`,
-            width: '100%',
-            position: 'relative',
-          }}
-        >
-          {virtualizer.getVirtualItems().map((virtualItem) => {
-            const log = filteredLogs[virtualItem.index];
-            return (
-              <div
-                key={virtualItem.key}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: `${virtualItem.size}px`,
-                  transform: `translateY(${virtualItem.start}px)`,
-                }}
-                className="flex items-start gap-2 px-3 py-1 hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-50 dark:border-gray-900"
-              >
-                <span className="text-gray-400 w-20 flex-shrink-0">
-                  {friendlyMode
-                    ? formatTimestamp(log.captured_at, true)
-                    : new Date(log.captured_at).toISOString().slice(11, 23)}
-                </span>
-                <span className="w-6 flex-shrink-0">
-                  <LogLevelBadge level={log.level} />
-                </span>
-                <span className="text-purple-600 dark:text-purple-400 w-32 flex-shrink-0 truncate">
-                  {log.tag ?? '—'}
-                </span>
-                <span className={`flex-1 break-all ${LEVEL_COLORS[log.level]}`}>
-                  {log.message}
-                </span>
-                {!friendlyMode && log.pid && (
-                  <span className="text-gray-400 flex-shrink-0">
-                    {log.pid}/{log.tid}
-                  </span>
-                )}
-              </div>
-            );
-          })}
+      {filteredLogs.length === 0 && (
+        <div className="flex items-center justify-center h-32 text-xs text-gray-400 dark:text-gray-600">
+          {sessionId ? 'Waiting for log entries…' : 'Connect a device to stream logs.'}
         </div>
-        <div ref={bottomRef} />
-      </div>
+      )}
+
+      {/* Grouped view */}
+      {groupByTag && filteredLogs.length > 0 && (
+        <GroupedView groups={tagGroups} friendly={friendlyMode} />
+      )}
+
+      {/* Flat virtual log table */}
+      {!groupByTag && (
+        <div ref={parentRef} className="flex-1 overflow-auto font-mono text-xs">
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              width: '100%',
+              position: 'relative',
+            }}
+          >
+            {virtualizer.getVirtualItems().map((virtualItem) => {
+              const log = filteredLogs[virtualItem.index];
+              return (
+                <div
+                  key={virtualItem.key}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: `${virtualItem.size}px`,
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  <LogRow log={log} friendly={friendlyMode} />
+                </div>
+              );
+            })}
+          </div>
+          <div ref={bottomRef} />
+        </div>
+      )}
     </div>
   );
 }

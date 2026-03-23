@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useApps, useForceStop, useClearData, useDisableApp, useUninstallApp } from '@/hooks/useApps';
-import { MOCK_PACKAGES } from '@/services/mockData';
 import type { Package } from '@/types';
 
 interface ConfirmDialog {
@@ -25,10 +24,10 @@ const ACTION_DESCRIPTIONS = {
 
 export default function ControlsPage() {
   const activeSession = useSessionStore((s) => s.activeSession);
-  const sessionId = activeSession?.id ?? null;
+  const serial = activeSession?.serial ?? null;
 
-  const { data: apps } = useApps(sessionId);
-  const displayApps = apps ?? MOCK_PACKAGES;
+  const { data: apps } = useApps(serial);
+  const displayApps = apps ?? [];
 
   const [search, setSearch] = useState('');
   const [confirm, setConfirm] = useState<ConfirmDialog | null>(null);
@@ -45,9 +44,9 @@ export default function ControlsPage() {
   );
 
   const handleConfirm = () => {
-    if (!confirm || !sessionId) return;
+    if (!confirm || !serial) return;
     const { type, pkg } = confirm;
-    const args = { sessionId, packageName: pkg.package_name };
+    const args = { serial, packageName: pkg.package_name };
     switch (type) {
       case 'force_stop':
         forceStop.mutate(args);
@@ -76,7 +75,7 @@ export default function ControlsPage() {
           onChange={(e) => setSearch(e.target.value)}
           className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400"
         />
-        {!sessionId && (
+        {!serial && (
           <p className="mt-2 text-xs text-yellow-600 dark:text-yellow-400">
             Connect a device to perform actions.
           </p>
@@ -85,7 +84,7 @@ export default function ControlsPage() {
 
       <div className="flex-1 overflow-auto divide-y divide-gray-100 dark:divide-gray-800">
         {filteredApps.map((app) => (
-          <div key={app.id} className="flex items-center justify-between px-4 py-3">
+          <div key={app.package_name} className="flex items-center justify-between px-4 py-3">
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-white">
                 {app.app_label ?? app.package_name}
@@ -98,7 +97,7 @@ export default function ControlsPage() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                disabled={!sessionId}
+                disabled={!serial}
                 onClick={() => setConfirm({ type: 'force_stop', pkg: app })}
                 className="px-2.5 py-1 text-xs rounded border border-yellow-400 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 disabled:opacity-40 transition-colors"
               >
@@ -106,7 +105,7 @@ export default function ControlsPage() {
               </button>
               <button
                 type="button"
-                disabled={!sessionId}
+                disabled={!serial}
                 onClick={() => setConfirm({ type: 'clear_data', pkg: app })}
                 className="px-2.5 py-1 text-xs rounded border border-orange-400 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 disabled:opacity-40 transition-colors"
               >
@@ -115,7 +114,7 @@ export default function ControlsPage() {
               {!app.is_system && (
                 <button
                   type="button"
-                  disabled={!sessionId}
+                  disabled={!serial}
                   onClick={() => setConfirm({ type: 'uninstall', pkg: app })}
                   className="px-2.5 py-1 text-xs rounded border border-red-400 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-40 transition-colors"
                 >

@@ -70,72 +70,72 @@ export const sessionCommands = {
   start_session: (serial: string): Promise<SessionInfo> =>
     invoke('start_session', { serial }),
 
-  stop_session: (sessionId: number): Promise<void> =>
-    invoke('stop_session', { session_id: sessionId }),
+  stop_session: (serial: string, sessionId: number): Promise<void> =>
+    invoke('stop_session', { serial, session_id: sessionId }),
 };
 
 // ─── App Commands ─────────────────────────────────────────────────────────────
 
 export const appCommands = {
-  list_packages: (sessionId: number): Promise<Package[]> =>
-    invoke('list_packages', { session_id: sessionId }),
+  list_packages: (serial: string): Promise<Package[]> =>
+    invoke('list_packages', { serial }),
 
   get_package_detail: (
-    sessionId: number,
+    serial: string,
     packageName: string,
   ): Promise<PackageDetail> =>
     invoke('get_package_detail', {
-      session_id: sessionId,
+      serial,
       package_name: packageName,
     }),
 
-  force_stop: (sessionId: number, packageName: string): Promise<void> =>
+  force_stop: (serial: string, packageName: string): Promise<void> =>
     invoke('force_stop', {
-      session_id: sessionId,
+      serial,
       package_name: packageName,
     }),
 
-  clear_data: (sessionId: number, packageName: string): Promise<void> =>
+  clear_data: (serial: string, packageName: string): Promise<void> =>
     invoke('clear_data', {
-      session_id: sessionId,
+      serial,
       package_name: packageName,
     }),
 
-  disable_app: (sessionId: number, packageName: string): Promise<void> =>
+  disable_app: (serial: string, packageName: string): Promise<void> =>
     invoke('disable_app', {
-      session_id: sessionId,
+      serial,
       package_name: packageName,
     }),
 
   uninstall_app: (
-    sessionId: number,
+    serial: string,
     packageName: string,
     keepData: boolean,
   ): Promise<void> =>
     invoke('uninstall_app', {
-      session_id: sessionId,
+      serial,
       package_name: packageName,
       keep_data: keepData,
     }),
 
   revoke_permission: (
-    sessionId: number,
+    serial: string,
     packageName: string,
     permission: string,
   ): Promise<void> =>
     invoke('revoke_permission', {
-      session_id: sessionId,
+      serial,
       package_name: packageName,
       permission,
     }),
 
   grant_permission: (
-    sessionId: number,
+    serial: string,
     packageName: string,
     permission: string,
   ): Promise<void> =>
     invoke('grant_permission', {
-      session_id: sessionId,
+      serial,
       package_name: packageName,
       permission,
     }),
@@ -479,71 +479,74 @@ export const exportCommands = {
 export const events = {
   onDeviceEvent: (
     callback: (event: DeviceEvent) => void,
-  ): Promise<() => void> =>
-    listen<DeviceEvent>('phonescope://device_event', (e) =>
-      callback(e.payload),
-    ),
+  ): Promise<() => void> => {
+    console.log('[ipc] registering device-event listener');
+    return listen<DeviceEvent>('device-event', (e) => {
+      console.log('[ipc] device-event received:', e.payload);
+      callback(e.payload);
+    });
+  },
 
   onDeviceConnected: (
     callback: (info: DeviceInfo) => void,
   ): Promise<() => void> =>
-    listen<DeviceInfo>('phonescope://device_connected', (e) =>
+    listen<DeviceInfo>('device-connected', (e) =>
       callback(e.payload),
     ),
 
   onDeviceDisconnected: (
     callback: (serial: string) => void,
   ): Promise<() => void> =>
-    listen<string>('phonescope://device_disconnected', (e) =>
+    listen<string>('device-disconnected', (e) =>
       callback(e.payload),
     ),
 
   onSessionStarted: (
     callback: (info: SessionInfo) => void,
   ): Promise<() => void> =>
-    listen<SessionInfo>('phonescope://session_started', (e) =>
+    listen<SessionInfo>('session-started', (e) =>
       callback(e.payload),
     ),
 
   onSessionEnded: (
     callback: (sessionId: number) => void,
   ): Promise<() => void> =>
-    listen<number>('phonescope://session_ended', (e) =>
+    listen<number>('session-ended', (e) =>
       callback(e.payload),
     ),
 
   onCapabilityDetected: (
     callback: (profile: CapabilityProfile) => void,
   ): Promise<() => void> =>
-    listen<CapabilityProfile>('phonescope://capability_detected', (e) =>
+    listen<CapabilityProfile>('capability-detected', (e) =>
       callback(e.payload),
     ),
 
   onInsightGenerated: (
     callback: (insight: Insight) => void,
   ): Promise<() => void> =>
-    listen<Insight>('phonescope://insight_generated', (e) =>
+    listen<Insight>('insight-generated', (e) =>
       callback(e.payload),
     ),
 
   onCollectorStatusChanged: (
     callback: (status: CollectorStatus) => void,
   ): Promise<() => void> =>
-    listen<CollectorStatus>('phonescope://collector_status_changed', (e) =>
+    listen<CollectorStatus>('collector-status-changed', (e) =>
       callback(e.payload),
     ),
 
   onProxyStatusChanged: (
     callback: (running: boolean) => void,
   ): Promise<() => void> =>
-    listen<boolean>('phonescope://proxy_status_changed', (e) =>
+    listen<boolean>('proxy-status-changed', (e) =>
       callback(e.payload),
     ),
 
   onUsageSnapshotCaptured: (
     callback: (snapshotId: number) => void,
   ): Promise<() => void> =>
-    listen<number>('phonescope://usage_snapshot_captured', (e) =>
+    listen<number>('usage-snapshot-captured', (e) =>
       callback(e.payload),
     ),
 };

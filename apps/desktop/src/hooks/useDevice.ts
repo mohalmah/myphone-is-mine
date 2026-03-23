@@ -51,7 +51,7 @@ export function useDisconnectDevice() {
 
   return useMutation({
     mutationFn: ({ serial, sessionId }: { serial: string; sessionId: number }) =>
-      ipc.sessionCommands.stop_session(sessionId).then(() =>
+      ipc.sessionCommands.stop_session(serial, sessionId).then(() =>
         ipc.deviceCommands.disconnect_device(serial),
       ),
     onSuccess: () => {

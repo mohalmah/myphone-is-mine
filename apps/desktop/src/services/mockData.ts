@@ -38,6 +38,7 @@ export const MOCK_DEVICE: DeviceInfo = {
 
 export const MOCK_SESSION: SessionInfo = {
   id: 1,
+  serial: 'emulator-5554',
   device_id: 1,
   started_at: new Date(Date.now() - 3600 * 1000).toISOString(),
   ended_at: null,
@@ -109,8 +110,9 @@ export const MOCK_PACKAGES: Package[] = [
     installer: null,
     target_sdk: 34,
     min_sdk: 26,
-    first_seen_at: new Date(Date.now() - 30 * 86400 * 1000).toISOString(),
-    last_updated_at: new Date(Date.now() - 86400 * 1000).toISOString(),
+    apk_size_bytes: null,
+    first_install_time: null,
+    last_update_time: null,
   },
   {
     id: 2,
@@ -124,8 +126,9 @@ export const MOCK_PACKAGES: Package[] = [
     installer: 'com.android.vending',
     target_sdk: 34,
     min_sdk: 26,
-    first_seen_at: new Date(Date.now() - 15 * 86400 * 1000).toISOString(),
-    last_updated_at: new Date(Date.now() - 2 * 86400 * 1000).toISOString(),
+    apk_size_bytes: null,
+    first_install_time: null,
+    last_update_time: null,
   },
   {
     id: 3,
@@ -139,8 +142,9 @@ export const MOCK_PACKAGES: Package[] = [
     installer: 'com.android.vending',
     target_sdk: 33,
     min_sdk: 24,
-    first_seen_at: new Date(Date.now() - 60 * 86400 * 1000).toISOString(),
-    last_updated_at: new Date(Date.now() - 7 * 86400 * 1000).toISOString(),
+    apk_size_bytes: null,
+    first_install_time: null,
+    last_update_time: null,
   },
   {
     id: 4,
@@ -154,8 +158,9 @@ export const MOCK_PACKAGES: Package[] = [
     installer: 'com.android.vending',
     target_sdk: 34,
     min_sdk: 21,
-    first_seen_at: new Date(Date.now() - 90 * 86400 * 1000).toISOString(),
-    last_updated_at: new Date(Date.now() - 3 * 86400 * 1000).toISOString(),
+    apk_size_bytes: null,
+    first_install_time: null,
+    last_update_time: null,
   },
   {
     id: 5,
@@ -169,8 +174,9 @@ export const MOCK_PACKAGES: Package[] = [
     installer: 'com.android.vending',
     target_sdk: 34,
     min_sdk: 26,
-    first_seen_at: new Date(Date.now() - 45 * 86400 * 1000).toISOString(),
-    last_updated_at: new Date(Date.now() - 1 * 86400 * 1000).toISOString(),
+    apk_size_bytes: null,
+    first_install_time: null,
+    last_update_time: null,
   },
 ];
 

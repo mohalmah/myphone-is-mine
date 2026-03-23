@@ -5,8 +5,6 @@ import { DomainTag } from '@/components/common/DomainTag';
 import { RiskBadge } from '@/components/common/Badge';
 import { formatBytes } from '@/services/formatters';
 import { useUIStore } from '@/stores/uiStore';
-import { MOCK_DOMAIN_BREAKDOWN, MOCK_NETWORK_FLOWS } from '@/services/mockData';
-
 export default function NetworkPage() {
   const activeSession = useSessionStore((s) => s.activeSession);
   const sessionId = activeSession?.id ?? null;
@@ -15,8 +13,8 @@ export default function NetworkPage() {
   const { data: domainBreakdown } = useDomainBreakdown(sessionId);
   const { data: flows } = useNetworkFlows(sessionId);
 
-  const displayDomains = domainBreakdown ?? MOCK_DOMAIN_BREAKDOWN;
-  const displayFlows = flows ?? MOCK_NETWORK_FLOWS;
+  const displayDomains = domainBreakdown ?? [];
+  const displayFlows = flows ?? [];
 
   return (
     <div className="p-4 space-y-6">
@@ -39,6 +37,11 @@ export default function NetworkPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              {displayDomains.length === 0 && (
+                <tr><td colSpan={6} className="px-3 py-6 text-center text-xs text-gray-400">
+                  {sessionId ? 'No domain data yet — requires helper app or root.' : 'Connect a device and start a session.'}
+                </td></tr>
+              )}
               {displayDomains.map((d) => (
                 <tr key={d.domain} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                   <td className="px-3 py-2">
@@ -83,6 +86,11 @@ export default function NetworkPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              {displayFlows.length === 0 && (
+                <tr><td colSpan={5} className="px-3 py-6 text-center text-xs text-gray-400">
+                  {sessionId ? 'No network flows yet — requires helper app or root.' : 'Connect a device and start a session.'}
+                </td></tr>
+              )}
               {displayFlows.map((flow) => (
                 <tr key={flow.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                   <td className="px-3 py-2 text-xs font-mono text-gray-700 dark:text-gray-300">

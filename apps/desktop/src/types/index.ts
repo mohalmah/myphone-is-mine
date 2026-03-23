@@ -26,7 +26,8 @@ export interface DeviceInfo {
 
 export interface SessionInfo {
   id: number;
-  device_id: number;
+  serial: string;
+  device_id?: number;
   started_at: string;
   ended_at: string | null;
   mode: 'basic' | 'helper' | 'proxy' | 'root';
@@ -75,7 +76,7 @@ export interface LogFilter {
 
 export interface Package {
   id: number;
-  device_id: number;
+  device_id?: number;
   package_name: string;
   app_label: string | null;
   version_name: string | null;
@@ -85,20 +86,26 @@ export interface Package {
   installer: string | null;
   target_sdk: number | null;
   min_sdk: number | null;
-  first_seen_at: string;
-  last_updated_at: string;
+  apk_size_bytes: number | null;
+  first_install_time: string | null;
+  last_update_time: string | null;
+  first_seen_at?: string;
+  last_updated_at?: string;
 }
 
 export interface AppPermission {
   id: number;
-  package_id: number;
   permission: string;
   is_granted: boolean;
-  captured_at: string;
 }
 
 export interface PackageDetail extends Package {
   permissions: AppPermission[];
+  data_size_bytes: number | null;
+  cache_size_bytes: number | null;
+  code_path: string | null;
+  activities: string[];
+  services: string[];
 }
 
 // ─── Network ─────────────────────────────────────────────────────────────────

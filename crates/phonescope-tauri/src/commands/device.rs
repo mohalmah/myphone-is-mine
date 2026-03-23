@@ -94,7 +94,7 @@ pub async fn disconnect_device(
     serial: String,
     state: State<'_, AppState>,
 ) -> Result<(), String> {
-    let core = state.core.lock().unwrap();
+    let core = state.core.lock().await;
     let _ = core.stop_session(&serial).await;
     Ok(())
 }

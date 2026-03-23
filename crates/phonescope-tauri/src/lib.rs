@@ -19,10 +19,13 @@ pub fn build_app() -> tauri::Builder<tauri::Wry> {
             session::get_active_sessions,
             // Apps
             apps::list_packages,
+            apps::get_package_detail,
             apps::force_stop,
             apps::clear_data,
             apps::disable_app,
             apps::uninstall_app,
+            apps::revoke_permission,
+            apps::grant_permission,
             // Logs
             logs::get_logs,
             logs::get_log_tags,

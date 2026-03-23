@@ -3,7 +3,6 @@ import { useSessionStore } from '@/stores/sessionStore';
 import { useStorageOverview, useAppStorageBreakdown } from '@/hooks/useStorage';
 import { formatBytes } from '@/services/formatters';
 import { useUIStore } from '@/stores/uiStore';
-import { MOCK_STORAGE } from '@/services/mockData';
 
 export default function StoragePage() {
   const activeSession = useSessionStore((s) => s.activeSession);
@@ -13,8 +12,7 @@ export default function StoragePage() {
   const { data: overview } = useStorageOverview(sessionId);
   const { data: appBreakdown = [] } = useAppStorageBreakdown(sessionId);
 
-  const displayOverview = overview ?? MOCK_STORAGE;
-  const usedPercent = Math.round((displayOverview.used_bytes / displayOverview.total_bytes) * 100);
+  const usedPercent = overview ? Math.round((overview.used_bytes / overview.total_bytes) * 100) : 0;
 
   return (
     <div className="p-4 space-y-6">
@@ -25,10 +23,10 @@ export default function StoragePage() {
         <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 space-y-3">
           <div className="flex justify-between text-sm">
             <span className="text-gray-700 dark:text-gray-300">
-              {formatBytes(displayOverview.used_bytes, friendlyMode)} used
+              {formatBytes(overview?.used_bytes ?? 0, friendlyMode)} used
             </span>
             <span className="text-gray-500 dark:text-gray-400">
-              {formatBytes(displayOverview.free_bytes, friendlyMode)} free of {formatBytes(displayOverview.total_bytes, friendlyMode)}
+              {formatBytes(overview?.free_bytes ?? 0, friendlyMode)} free of {formatBytes(overview?.total_bytes ?? 0, friendlyMode)}
             </span>
           </div>
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">

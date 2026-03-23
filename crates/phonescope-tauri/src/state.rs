@@ -7,14 +7,17 @@ use tracing::{info, warn};
 
 /// Global application state managed by Tauri.
 ///
-/// All fields wrapped in `Mutex` so the struct is `Send + Sync`.
+/// `core` uses `tokio::sync::Mutex` because its methods are async.
+/// Other fields use `std::sync::Mutex` (sync access only).
 pub struct AppState {
     /// Resolved path to the adb binary.
     pub adb_path: Mutex<String>,
     /// Core orchestrator (sessions, event bus, capability detection).
-    pub core: Mutex<PhoneScope>,
+    pub core: tokio::sync::Mutex<PhoneScope>,
     /// SQLite database handle.
     pub db: Mutex<Database>,
+    /// Active logcat streaming tasks keyed by device serial.
+    pub logcat_tasks: Mutex<std::collections::HashMap<String, tokio::task::AbortHandle>>,
 }
 
 impl AppState {
@@ -31,8 +34,9 @@ impl AppState {
 
         Self {
             adb_path: Mutex::new(adb_path),
-            core: Mutex::new(core),
+            core: tokio::sync::Mutex::new(core),
             db: Mutex::new(db),
+            logcat_tasks: Mutex::new(std::collections::HashMap::new()),
         }
     }
 }

@@ -1,21 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ipc } from '@/services/ipc';
 
-export function useApps(sessionId: number | null) {
+export function useApps(serial: string | null) {
   return useQuery({
-    queryKey: ['apps', sessionId],
-    queryFn: () => ipc.appCommands.list_packages(sessionId!),
-    enabled: sessionId !== null,
+    queryKey: ['apps', serial],
+    queryFn: () => ipc.appCommands.list_packages(serial!),
+    enabled: serial !== null,
     refetchInterval: 60_000,
   });
 }
 
-export function useAppDetail(sessionId: number | null, packageName: string | null) {
+export function useAppDetail(serial: string | null, packageName: string | null) {
   return useQuery({
-    queryKey: ['app', sessionId, packageName],
+    queryKey: ['app', serial, packageName],
     queryFn: () =>
-      ipc.appCommands.get_package_detail(sessionId!, packageName!),
-    enabled: sessionId !== null && packageName !== null,
+      ipc.appCommands.get_package_detail(serial!, packageName!),
+    enabled: serial !== null && packageName !== null,
     staleTime: 30_000,
   });
 }
@@ -24,14 +24,14 @@ export function useForceStop() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
-      sessionId,
+      serial,
       packageName,
     }: {
-      sessionId: number;
+      serial: string;
       packageName: string;
-    }) => ipc.appCommands.force_stop(sessionId, packageName),
-    onSuccess: (_data, { sessionId }) => {
-      void queryClient.invalidateQueries({ queryKey: ['apps', sessionId] });
+    }) => ipc.appCommands.force_stop(serial, packageName),
+    onSuccess: (_data, { serial }) => {
+      void queryClient.invalidateQueries({ queryKey: ['apps', serial] });
     },
   });
 }
@@ -40,14 +40,14 @@ export function useClearData() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
-      sessionId,
+      serial,
       packageName,
     }: {
-      sessionId: number;
+      serial: string;
       packageName: string;
-    }) => ipc.appCommands.clear_data(sessionId, packageName),
-    onSuccess: (_data, { sessionId }) => {
-      void queryClient.invalidateQueries({ queryKey: ['apps', sessionId] });
+    }) => ipc.appCommands.clear_data(serial, packageName),
+    onSuccess: (_data, { serial }) => {
+      void queryClient.invalidateQueries({ queryKey: ['apps', serial] });
     },
   });
 }
@@ -56,14 +56,14 @@ export function useDisableApp() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
-      sessionId,
+      serial,
       packageName,
     }: {
-      sessionId: number;
+      serial: string;
       packageName: string;
-    }) => ipc.appCommands.disable_app(sessionId, packageName),
-    onSuccess: (_data, { sessionId }) => {
-      void queryClient.invalidateQueries({ queryKey: ['apps', sessionId] });
+    }) => ipc.appCommands.disable_app(serial, packageName),
+    onSuccess: (_data, { serial }) => {
+      void queryClient.invalidateQueries({ queryKey: ['apps', serial] });
     },
   });
 }
@@ -72,16 +72,16 @@ export function useUninstallApp() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
-      sessionId,
+      serial,
       packageName,
       keepData = false,
     }: {
-      sessionId: number;
+      serial: string;
       packageName: string;
       keepData?: boolean;
-    }) => ipc.appCommands.uninstall_app(sessionId, packageName, keepData),
-    onSuccess: (_data, { sessionId }) => {
-      void queryClient.invalidateQueries({ queryKey: ['apps', sessionId] });
+    }) => ipc.appCommands.uninstall_app(serial, packageName, keepData),
+    onSuccess: (_data, { serial }) => {
+      void queryClient.invalidateQueries({ queryKey: ['apps', serial] });
     },
   });
 }

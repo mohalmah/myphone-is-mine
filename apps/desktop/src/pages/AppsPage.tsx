@@ -4,18 +4,20 @@ import { useSessionStore } from '@/stores/sessionStore';
 import { useApps } from '@/hooks/useApps';
 import { DataTable } from '@/components/common/DataTable';
 import { Badge } from '@/components/common/Badge';
+import { formatBytes } from '@/services/formatters';
+import { useUIStore } from '@/stores/uiStore';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { Package } from '@/types';
-import { MOCK_PACKAGES } from '@/services/mockData';
 
 type AppFilter = 'all' | 'user' | 'system';
 
 export default function AppsPage() {
   const activeSession = useSessionStore((s) => s.activeSession);
-  const sessionId = activeSession?.id ?? null;
+  const serial = activeSession?.serial ?? null;
+  const friendlyMode = useUIStore((s) => s.friendlyMode);
 
-  const { data: apps, isLoading } = useApps(sessionId);
-  const displayApps = apps ?? MOCK_PACKAGES;
+  const { data: apps, isLoading } = useApps(serial);
+  const displayApps = apps ?? [];
 
   const [filter, setFilter] = useState<AppFilter>('all');
   const [globalFilter, setGlobalFilter] = useState('');
@@ -30,32 +32,69 @@ export default function AppsPage() {
 
   const columns: ColumnDef<Package>[] = [
     {
-      accessorKey: 'app_label',
-      header: 'Name',
+      accessorKey: 'package_name',
+      header: 'Package',
       cell: ({ row }) => (
         <Link
           to={`/apps/${row.original.package_name}`}
-          className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
+          className="font-mono text-xs text-blue-600 dark:text-blue-400 hover:underline"
         >
-          {row.original.app_label ?? row.original.package_name}
+          {row.original.package_name}
         </Link>
-      ),
-    },
-    {
-      accessorKey: 'package_name',
-      header: 'Package',
-      cell: ({ getValue }) => (
-        <span className="font-mono text-xs text-gray-600 dark:text-gray-400">
-          {getValue() as string}
-        </span>
       ),
     },
     {
       accessorKey: 'version_name',
       header: 'Version',
-      cell: ({ getValue }) => (
-        <span className="text-xs">{(getValue() as string | null) ?? '—'}</span>
+      cell: ({ row }) => (
+        <span className="text-xs">
+          {row.original.version_name ?? '—'}
+          {row.original.version_code != null && (
+            <span className="text-gray-400 ml-1">({row.original.version_code})</span>
+          )}
+        </span>
       ),
+    },
+    {
+      accessorKey: 'apk_size_bytes',
+      header: 'APK Size',
+      cell: ({ getValue }) => {
+        const v = getValue() as number | null;
+        return (
+          <span className="text-xs">
+            {v != null ? formatBytes(v, friendlyMode) : '—'}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: 'target_sdk',
+      header: 'SDK',
+      cell: ({ row }) => (
+        <span className="text-xs text-gray-600 dark:text-gray-400">
+          {row.original.min_sdk != null ? `${row.original.min_sdk}+` : ''}
+          {row.original.target_sdk != null ? ` / ${row.original.target_sdk}` : '—'}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'installer',
+      header: 'Installer',
+      cell: ({ getValue }) => {
+        const v = getValue() as string | null;
+        const label = v?.replace('com.android.', '').replace('com.google.android.', 'Google ') ?? '—';
+        return <span className="text-xs text-gray-600 dark:text-gray-400">{label}</span>;
+      },
+    },
+    {
+      accessorKey: 'last_update_time',
+      header: 'Updated',
+      cell: ({ getValue }) => {
+        const v = getValue() as string | null;
+        if (!v) return <span className="text-xs">—</span>;
+        // Android format: "2023-01-15 10:30:00"
+        return <span className="text-xs text-gray-600 dark:text-gray-400">{v.slice(0, 10)}</span>;
+      },
     },
     {
       accessorKey: 'is_system',
@@ -73,13 +112,6 @@ export default function AppsPage() {
         <Badge variant={getValue() ? 'success' : 'muted'} size="sm">
           {getValue() ? 'Enabled' : 'Disabled'}
         </Badge>
-      ),
-    },
-    {
-      accessorKey: 'target_sdk',
-      header: 'SDK',
-      cell: ({ getValue }) => (
-        <span className="text-xs">{(getValue() as number | null) ?? '—'}</span>
       ),
     },
     {
@@ -140,7 +172,7 @@ export default function AppsPage() {
           globalFilter={globalFilter}
           onGlobalFilterChange={setGlobalFilter}
           isLoading={isLoading}
-          emptyMessage="No apps found."
+          emptyMessage={serial ? 'No apps found.' : 'Connect a device to list apps.'}
         />
       </div>
     </div>

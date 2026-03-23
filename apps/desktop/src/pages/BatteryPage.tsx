@@ -12,7 +12,6 @@ import {
 } from 'recharts';
 import { formatTimestamp, formatTemperature } from '@/services/formatters';
 import { useUIStore } from '@/stores/uiStore';
-import { MOCK_BATTERY_SAMPLES, MOCK_BATTERY_STATS } from '@/services/mockData';
 
 export default function BatteryPage() {
   const activeSession = useSessionStore((s) => s.activeSession);
@@ -22,8 +21,8 @@ export default function BatteryPage() {
   const { data: timeline } = useBatteryTimeline(sessionId);
   const { data: stats } = useCurrentBattery(sessionId);
 
-  const displayTimeline = timeline ?? MOCK_BATTERY_SAMPLES;
-  const displayStats = stats ?? MOCK_BATTERY_STATS;
+  const displayTimeline = timeline ?? [];
+  const displayStats = stats ?? null;
 
   const chartData = displayTimeline.map((s) => ({
     time: new Date(s.captured_at).getTime(),
@@ -36,41 +35,43 @@ export default function BatteryPage() {
       <h1 className="text-xl font-bold text-gray-900 dark:text-white">Battery</h1>
 
       {/* Current stats */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Level</p>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">
-            {displayStats.current_level}%
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            {displayStats.is_charging ? '⚡ Charging' : 'Discharging'}
-          </p>
-        </div>
-        {displayStats.temperature && (
+      {displayStats && (
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Temperature</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {formatTemperature(displayStats.temperature, friendlyMode)}
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Level</p>
+            <p className="text-3xl font-bold text-gray-900 dark:text-white">
+              {displayStats.current_level}%
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {displayStats.is_charging ? '⚡ Charging' : 'Discharging'}
             </p>
           </div>
-        )}
-        {displayStats.health && (
-          <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Health</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-white">
-              {displayStats.health}
-            </p>
-          </div>
-        )}
-        {displayStats.estimated_drain_per_hour !== null && (
-          <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Drain Rate</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {displayStats.estimated_drain_per_hour?.toFixed(1)}%/h
-            </p>
-          </div>
-        )}
-      </section>
+          {displayStats.temperature && (
+            <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Temperature</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {formatTemperature(displayStats.temperature, friendlyMode)}
+              </p>
+            </div>
+          )}
+          {displayStats.health && (
+            <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Health</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                {displayStats.health}
+              </p>
+            </div>
+          )}
+          {displayStats.estimated_drain_per_hour !== null && (
+            <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Drain Rate</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {displayStats.estimated_drain_per_hour?.toFixed(1)}%/h
+              </p>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Battery timeline chart */}
       <section>

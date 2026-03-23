@@ -28,7 +28,7 @@ pub fn get_adb_path(state: State<'_, AppState>) -> Option<String> {
 }
 
 #[tauri::command]
-pub fn set_adb_path(path: String, state: State<'_, AppState>) -> Result<(), String> {
+pub async fn set_adb_path(path: String, state: State<'_, AppState>) -> Result<(), String> {
     let ok = std::process::Command::new(&path)
         .arg("version")
         .stdout(std::process::Stdio::null())
@@ -42,7 +42,7 @@ pub fn set_adb_path(path: String, state: State<'_, AppState>) -> Result<(), Stri
     }
 
     *state.adb_path.lock().unwrap() = path.clone();
-    *state.core.lock().unwrap() = PhoneScope::new(
+    *state.core.lock().await = PhoneScope::new(
         Config { adb_path: Some(path.clone()), ..Config::default() },
         Some(AdbManager::with_path(&path)),
     );
@@ -50,9 +50,9 @@ pub fn set_adb_path(path: String, state: State<'_, AppState>) -> Result<(), Stri
 }
 
 #[tauri::command]
-pub fn update_settings(settings: serde_json::Value, state: State<'_, AppState>) -> Result<(), String> {
+pub async fn update_settings(settings: serde_json::Value, state: State<'_, AppState>) -> Result<(), String> {
     if let Some(path) = settings.get("adb_path").and_then(|v| v.as_str()) {
-        set_adb_path(path.to_string(), state)?;
+        set_adb_path(path.to_string(), state).await?;
     }
     Ok(())
 }

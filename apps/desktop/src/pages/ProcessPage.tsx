@@ -4,7 +4,6 @@ import { useSystemResources, useThermalSamples } from '@/hooks/useProcess';
 import { DataTable } from '@/components/common/DataTable';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { ProcessEntry } from '@/types';
-import { MOCK_SYSTEM_RESOURCES, MOCK_THERMAL_SAMPLES } from '@/services/mockData';
 
 function GaugeBar({ value, max, color = 'bg-blue-500' }: { value: number; max: number; color?: string }) {
   const pct = Math.min(100, Math.round((value / max) * 100));
@@ -25,8 +24,8 @@ export default function ProcessPage() {
   const { data: resources } = useSystemResources(sessionId);
   const { data: thermalSamples } = useThermalSamples(sessionId);
 
-  const displayResources = resources ?? MOCK_SYSTEM_RESOURCES;
-  const displayThermal = thermalSamples ?? MOCK_THERMAL_SAMPLES;
+  const displayResources = resources ?? null;
+  const displayThermal = thermalSamples ?? [];
 
   const columns: ColumnDef<ProcessEntry>[] = [
     { accessorKey: 'name', header: 'Process' },
@@ -56,26 +55,28 @@ export default function ProcessPage() {
       <h1 className="text-xl font-bold text-gray-900 dark:text-white">Process & Resources</h1>
 
       {/* System gauges */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 space-y-3">
-          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">CPU</p>
-          <GaugeBar value={displayResources.total_cpu_percent} max={100} color="bg-blue-500" />
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {displayResources.total_cpu_percent.toFixed(1)}% total CPU usage
-          </p>
-        </div>
-        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 space-y-3">
-          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">RAM</p>
-          <GaugeBar
-            value={displayResources.used_ram_kb}
-            max={displayResources.total_ram_kb}
-            color="bg-purple-500"
-          />
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {(displayResources.used_ram_kb / 1024 / 1024).toFixed(1)} GB of {(displayResources.total_ram_kb / 1024 / 1024).toFixed(1)} GB used
-          </p>
-        </div>
-      </section>
+      {displayResources && (
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">CPU</p>
+            <GaugeBar value={displayResources.total_cpu_percent} max={100} color="bg-blue-500" />
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {displayResources.total_cpu_percent.toFixed(1)}% total CPU usage
+            </p>
+          </div>
+          <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">RAM</p>
+            <GaugeBar
+              value={displayResources.used_ram_kb}
+              max={displayResources.total_ram_kb}
+              color="bg-purple-500"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {(displayResources.used_ram_kb / 1024 / 1024).toFixed(1)} GB of {(displayResources.total_ram_kb / 1024 / 1024).toFixed(1)} GB used
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* Thermal zones */}
       {Object.keys(thermalZones).length > 0 && (
@@ -97,10 +98,10 @@ export default function ProcessPage() {
       {/* Process table */}
       <section>
         <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-          Processes ({displayResources.processes.length})
+          Processes ({displayResources ? displayResources.processes.length : 0})
         </h2>
         <DataTable
-          data={displayResources.processes}
+          data={displayResources ? displayResources.processes : []}
           columns={columns}
           emptyMessage="No process data available."
           className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700"
